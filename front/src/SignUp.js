@@ -4,6 +4,7 @@ export default class SignUp extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      flash: "",
       email: "mon@email.com",
       password: "",
       passwordconf: "",
@@ -33,10 +34,21 @@ export default class SignUp extends Component {
   }
 
   handleSubmit(event) {
-    if (this.state.password != this.state.passwordconf) {
+    if (this.state.password !== this.state.passwordconf) {
       alert("Password confirmation did not match!");
     } else {
-      console.log(this.state);
+      fetch("/auth/signup", {
+        method: "POST",
+        headers: new Headers({
+          "Content-Type": "application/json"
+        }),
+        body: JSON.stringify(this.state)
+      })
+        .then((res) => res.json())
+        .then(
+          (res) => this.setState({ flash: res.flash }), //status code 2xx
+          (err) => this.setState({ flash: err.flash }), // status code 4xx 5xx
+        );
     }
     event.preventDefault();
   }
@@ -45,6 +57,7 @@ export default class SignUp extends Component {
     return (
       <div>
         <h1>{JSON.stringify(this.state, 1, 1)}</h1>
+        <h2>{this.state.flash}</h2>
         <form onSubmit={this.handleSubmit.bind(this)}>
           <input
             onChange={this.updateEmailField.bind(this)}
