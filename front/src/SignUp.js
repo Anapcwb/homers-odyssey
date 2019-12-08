@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { TextField, Button, Snackbar } from "@material-ui/core";
+import { Link, Redirect } from "react-router-dom";
 
 export default class SignUp extends Component {
   constructor(props) {
@@ -9,7 +11,8 @@ export default class SignUp extends Component {
       password: "",
       passwordconf: "",
       name: "James",
-      lastname: "Bond"
+      lastname: "Bond",
+      clicked: false
     };
   }
 
@@ -45,56 +48,81 @@ export default class SignUp extends Component {
         body: JSON.stringify(this.state)
       })
         .then((res) => res.json())
-        .then(
-          (res) => this.setState({ flash: res.flash }), //status code 2xx
-          (err) => this.setState({ flash: err.flash }), // status code 4xx 5xx
-        );
+        .then((res) => {
+          if (res.flash === "User has been signed up!") {
+            this.setState({ flash: res.flash, clicked: true });
+          } else {
+            this.setState({ flash: res.flash });
+          }
+        });
     }
     event.preventDefault();
   }
 
   render() {
+    let redirect = "";
+
+    if (this.state.clicked) {
+      redirect = <Redirect to="/" />;
+    }
+
     return (
       <div>
-        <h1>{JSON.stringify(this.state, 1, 1)}</h1>
-        <h2>{this.state.flash}</h2>
+        {redirect}
+        <h1>Sign up!</h1>
+        <Snackbar
+          open={this.state.flash !== ""}
+          onClose={() => {
+            this.setState({ flash: "" });
+          }}
+          autoHideDuration={4000}
+          ContentProps={{
+            "aria-describedby": "snackbar-fab-message-id"
+          }}
+          message={<span id="snackbar-fab-message-id">{this.state.flash}</span>}
+        />
         <form onSubmit={this.handleSubmit.bind(this)}>
-          <input
+          <TextField
             onChange={this.updateEmailField.bind(this)}
             type="email"
             name="email"
+            fullWidth
+            label="Email"
           />
-          <br />
-          <input
+          <TextField
             onChange={this.updateNameField.bind(this)}
             type="text"
             name="firstName"
-            placeholder="First Name"
+            fullWidth
+            label="First Name"
           />
-          <br />
-          <input
+          <TextField
             onChange={this.updateLastNameField.bind(this)}
             type="text"
             name="lastName"
-            placeholder="Last Name"
+            fullWidth
+            label="Last Name"
           />
-          <br />
-          <input
+          <TextField
             onChange={this.updatePasswordField.bind(this)}
             type="password"
             name="password"
-            placeholder="Password"
+            fullWidth
+            label="Password"
           />
-          <br />
-
-          <input
+          <TextField
             onChange={this.updatePasswordConfField.bind(this)}
             type="password"
             name="passwordConf"
-            placeholder="Password Confirmation"
+            fullWidth
+            label="Password Confirmation"
           />
           <br />
-          <input type="submit" value="Submit" />
+          <br />
+          <Button type="submit" variant="contained" color="primary">
+            Sign Up!
+          </Button>
+          <Link to="/signin">Sign in</Link>
         </form>
       </div>
     );
